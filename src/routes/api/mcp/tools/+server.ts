@@ -1,0 +1,59 @@
+import { env } from '$env/dynamic/private';
+import { error, json } from '@sveltejs/kit';
+import { z } from 'zod';
+import { requireCapabilityAccess, readJsonBody } from '$lib/server/access';
+import { byokToken } from '$lib/server/ai/config';
+import { connectionFor } from '$lib/server/mcp/config';
+import { executeRemoteTool, listRemoteTools } from '$lib/server/mcp/client';
+import type { RequestHandler } from './$types';
+
+const bodySchema = z.discriminatedUnion('action', [
+	z.object({ action: z.literal('list'), alias: z.string().max(40), token: z.string() }).strict(),
+	z
+		.object({
+			action: z.literal('execute'),
+			alias: z.string().max(40),
+			token: z.string(),
+			tool: z.string().max(128),
+			arguments: z.record(z.string(), z.unknown()),
+			confirmed: z.literal(true)
+		})
+		.strict()
+]);
+
+export const POST: RequestHandler = async (event) => {
+	if (env.MCP_CLIENT_ENABLED !== 'true') error(404, 'Remote tools are disabled.');
+	await requireCapabilityAccess(event);
+	if (env.MCP_CLIENT_ENABLED !== 'true') error(404, 'MCP client is disabled.');
+	const value = await readJsonBody(event.request);
+	let input: z.infer<typeof bodySchema>;
+	let connection: ReturnType<typeof connectionFor>;
+	try {
+		input = bodySchema.parse(value);
+		byokToken(input.token);
+		connection = connectionFor(env, input.alias);
+		if (input.action === 'execute' && !connection.tools.includes(input.tool))
+			throw new Error('Unapproved tool');
+	} catch {
+		error(400, 'Check the configured server, token, tool and explicit confirmation.');
+	}
+	try {
+		const output =
+			input.action === 'list'
+				? await listRemoteTools(connection, input.token, event.request.signal)
+				: await executeRemoteTool(
+						connection,
+						input.token,
+						input.tool,
+						input.arguments,
+						input.confirmed,
+						event.request.signal
+					);
+		return json(output, { headers: { 'Cache-Control': 'no-store' } });
+	} catch {
+		error(
+			502,
+			'The remote tool request failed or exceeded its limits. A submitted action may have completed; inspect its state before retrying.'
+		);
+	}
+};

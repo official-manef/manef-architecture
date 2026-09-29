@@ -1,0 +1,101 @@
+{
+	"name": "svelte-convex-starter",
+	"private": true,
+	"version": "0.6.1",
+	"description": "Svelte 5 Runes, SvelteKit, Bun and Convex starter with typed feature slices and an adaptive app shell.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rahmanef63/template-svelte-convex-starter.git"
+	},
+	"bugs": {
+		"url": "https://github.com/rahmanef63/template-svelte-convex-starter/issues"
+	},
+	"homepage": "https://github.com/rahmanef63/template-svelte-convex-starter#readme",
+	"keywords": [
+		"svelte",
+		"sveltekit",
+		"bun",
+		"convex",
+		"typescript",
+		"starter",
+		"template"
+	],
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && tsc --noEmit -p src/convex && node scripts/version.mjs --check && bun run assets:check",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"lint": "prettier --check . && eslint . && bun run lint:svelte5",
+		"lint:svelte5": "node scripts/check-svelte5.mjs",
+		"format": "prettier --write .",
+		"assets:generate": "bun scripts/assets.ts generate",
+		"assets:check": "bun scripts/assets.ts check",
+		"assets:prompts": "bun scripts/assets.ts prompts",
+		"test:unit": "vitest run",
+		"test:e2e": "playwright test",
+		"test:dev": "playwright test --config playwright.dev.config.ts",
+		"test": "bun run test:unit",
+		"convex:dev": "convex dev",
+		"convex:codegen": "convex codegen",
+		"build:deploy": "bun scripts/deploy.mjs",
+		"version:bump": "node scripts/version.mjs",
+		"verify": "bun run check && bun run lint && bun run test && bun run build"
+	},
+	"devDependencies": {
+		"@convex-dev/eslint-plugin": "4.0.0",
+		"@eslint/js": "^10.0.1",
+		"@internationalized/date": "^3.12.0",
+		"@playwright/test": "1.62.1",
+		"@resvg/resvg-js": "2.6.2",
+		"@sveltejs/adapter-node": "5.5.7",
+		"@sveltejs/adapter-vercel": "6.3.4",
+		"@sveltejs/kit": "2.70.3",
+		"@sveltejs/vite-plugin-svelte": "7.3.0",
+		"@tailwindcss/vite": "4.3.3",
+		"@types/node": "^22",
+		"convex-test": "0.0.56",
+		"eslint": "^10.4.1",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-svelte": "^3.19.0",
+		"globals": "^17.6.0",
+		"prettier": "^3.8.3",
+		"prettier-plugin-svelte": "^4.1.0",
+		"prettier-plugin-tailwindcss": "^0.8.0",
+		"shadcn-svelte": "1.5.1",
+		"svelte": "5.57.0",
+		"svelte-check": "^4.6.0",
+		"tailwind-variants": "^3.3.0",
+		"tailwindcss": "4.3.3",
+		"tw-animate-css": "1.4.0",
+		"typescript": "6.0.3",
+		"typescript-eslint": "^8.60.1",
+		"vite": "8.2.2",
+		"vitest": "4.1.11"
+	},
+	"packageManager": "bun@1.4.2",
+	"engines": {
+		"bun": ">=1.4.2 <2",
+		"node": "^22.23.2 || ^24.15.0"
+	},
+	"dependencies": {
+		"@ai-sdk/anthropic": "4.0.49",
+		"@ai-sdk/google": "4.0.64",
+		"@ai-sdk/openai": "4.0.60",
+		"@lucide/svelte": "^1.37.0",
+		"@modelcontextprotocol/sdk": "1.30.0",
+		"ai": "7.0.93",
+		"bits-ui": "2.19.0",
+		"convex": "1.45.0",
+		"convex-svelte": "0.14.0",
+		"jose": "6.2.12",
+		"openid-client": "6.8.8",
+		"zod": "4.5.4"
+	},
+	"overrides": {
+		"cookie": "0.7.2"
+	}
+}

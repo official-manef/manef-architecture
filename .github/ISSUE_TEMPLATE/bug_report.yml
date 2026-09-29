@@ -1,0 +1,17 @@
+name: Bug report
+description: Report a reproducible problem with the starter
+body:
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include the route, steps, expected behavior and actual result. Remove secrets from logs.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Template version, Bun and Node versions, OS, browser, and whether Convex is linked.
+    validations:
+      required: true
