@@ -3,6 +3,22 @@
 Notable template changes follow [Semantic Versioning](https://semver.org/).
 During 0.x, minor releases may change template structure; patch releases are compatible fixes.
 
+## [0.1.0] - 2026-09-29
+
+### Added
+
+- MANEF Architecture Inventory as a reusable Svelte 5 feature slice with a framework-neutral TypeScript graph core for SvelteKit and Next.js consumers.
+- Flow and graph layouts, pan/zoom, search and tag filtering, direct/connected trace, focus mode, editable nodes, ports and labeled edges, multi-target output connections, inventory materialization, and validated JSON import/export.
+- Optional Convex Cloud architecture snapshot persistence with owner authorization, validators, bounded indexed reads, graph limits, and production deployment support.
+- Product PRD, framework-adapter guidance, MANEF branding assets and production metadata for `architecture.manef.dev`.
+- Unit and browser acceptance coverage across narrow mobile, mobile, desktop, production preview and dev hydration.
+
+### Security and portability
+
+- The bundled graph contains only a small public MANEF seed; private repository/domain inventory is not embedded in reusable source.
+- Optional auth, AI, MCP, payment and email capabilities remain disabled unless explicitly configured.
+- The reusable core imports no Svelte, React, Next.js, browser-global or Convex runtime APIs.
+
 ## [0.6.1] - 2026-09-08
 
 - Align Composio setup with the current session-based MCP API and direct-tools preset.

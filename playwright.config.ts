@@ -13,11 +13,11 @@ export default defineConfig({
 			MCP_CLIENT_ENABLED: 'false',
 			MCP_SERVER_ENABLED: 'false',
 			PUBLIC_CONVEX_URL: '',
-			PUBLIC_SITE_URL: 'https://starter.example',
+			PUBLIC_SITE_URL: 'https://architecture.manef.dev',
 			PUBLIC_SEO_INDEXABLE: 'true',
 			PUBLIC_GOOGLE_SITE_VERIFICATION: 'google-test-token',
 			PUBLIC_BING_SITE_VERIFICATION: 'BING_TEST_TOKEN',
-			PUBLIC_TWITTER_SITE: '@starter'
+			PUBLIC_TWITTER_SITE: '@manef_test'
 		},
 		command: `bun run build && bun run preview -- --host 127.0.0.1 --port ${port}`,
 		url: baseURL,

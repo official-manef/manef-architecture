@@ -65,7 +65,7 @@ test('branding, sharing metadata and asset files agree across navigation', async
 	await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'index,follow');
 	await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
 		'href',
-		'https://starter.example/'
+		'https://architecture.manef.dev/'
 	);
 	await expect(page.locator('link[rel="icon"]')).toHaveAttribute(
 		'type',
@@ -73,7 +73,7 @@ test('branding, sharing metadata and asset files agree across navigation', async
 	);
 	await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
 		'content',
-		`https://starter.example${assets.socialImage.path}`
+		`https://architecture.manef.dev${assets.socialImage.path}`
 	);
 	for (const asset of Object.values(assets)) {
 		const response = await request.get(asset.path);
@@ -90,33 +90,28 @@ test('branding, sharing metadata and asset files agree across navigation', async
 		'content',
 		'BING_TEST_TOKEN'
 	);
-	await expect(page.locator('meta[name="twitter:site"]')).toHaveAttribute('content', '@starter');
+	await expect(page.locator('meta[name="twitter:site"]')).toHaveAttribute('content', '@manef_test');
 	const robots = await request.get('/robots.txt');
 	expect(robots.status()).toBe(200);
-	expect(await robots.text()).toContain('Sitemap: https://starter.example/sitemap.xml');
+	expect(await robots.text()).toContain('Sitemap: https://architecture.manef.dev/sitemap.xml');
 	const sitemap = await request.get('/sitemap.xml');
 	expect(sitemap.headers()['content-type']).toContain('application/xml');
-	expect(await sitemap.text()).toContain('<loc>https://starter.example/</loc>');
+	expect(await sitemap.text()).toContain('<loc>https://architecture.manef.dev/</loc>');
 	expect(await sitemap.text()).not.toContain('/apps/');
 	expect(manifest.icons[0]).toMatchObject({
 		src: assets.appIcon.path,
 		sizes: `${assets.appIcon.width}x${assets.appIcon.height}`
 	});
-	await page.getByRole('link', { name: appConfig.landing.action }).click();
-	await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
-		'content',
-		`Dashboard · ${appConfig.name}`
-	);
-	await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-		'href',
-		'https://starter.example/apps/dashboard'
-	);
-	await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex,nofollow');
+	await expect(page).toHaveTitle(appConfig.name);
+	await expect(
+		page.getByRole('application', { name: 'MANEF architecture graph canvas' })
+	).toBeVisible();
+	const graphMode = page.getByRole('button', { name: 'Graph', exact: true });
+	await graphMode.click();
+	await expect(graphMode).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('fresh clone boots, opens live-data and preserves keyboard navigation', async ({
-	page
-}, testInfo) => {
+test('fresh clone boots, opens live-data and preserves keyboard navigation', async ({ page }) => {
 	const errors: string[] = [];
 	page.on('pageerror', (error) => errors.push(error.message));
 	page.on('response', (response) => {
@@ -124,25 +119,16 @@ test('fresh clone boots, opens live-data and preserves keyboard navigation', asy
 	});
 	const response = await page.goto('/');
 	expect(response?.status()).toBe(200);
-	await expect(page).toHaveTitle('Svelte Convex Starter');
-	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+	await expect(page).toHaveTitle(appConfig.name);
+	await expect(page.getByRole('heading', { level: 1, name: appConfig.name })).toBeVisible();
 	expect(response?.headers()['x-content-type-options']).toBe('nosniff');
-	await page.getByRole('link', { name: 'Open starter' }).click();
-	const modes = page.getByRole('group', { name: 'Dashboard reference mode' });
-	await expect(modes.getByRole('button', { name: 'Architecture' })).toBeEnabled();
-	await modes.getByRole('button', { name: 'Architecture' }).focus();
-	await page.keyboard.press('Tab');
-	await page.keyboard.press('Enter');
-	await expect(modes.getByRole('button', { name: 'Interaction kit' })).toHaveAttribute(
-		'aria-pressed',
-		'true'
-	);
-	const nav = page.getByRole('navigation', {
-		name: testInfo.project.name === 'desktop' ? 'Apps' : 'Mobile app dock'
-	});
-	await nav.getByRole('link', { name: 'Live data' }).click();
+	const graphMode = page.getByRole('button', { name: 'Graph', exact: true });
+	await expect(graphMode).toBeEnabled();
+	await graphMode.press('Enter');
+	await expect(graphMode).toHaveAttribute('aria-pressed', 'true');
+	await page.goto('/apps/live-data');
 	await expect(page.getByText('Convex is ready to link')).toBeVisible();
-	await expect(page).toHaveTitle('Live data · Svelte Convex Starter');
+	await expect(page).toHaveTitle(`Live data · ${appConfig.name}`);
 	await page.getByRole('button', { name: 'Switch workspace: Starter workspace' }).click();
 	await expect(page.getByRole('menu')).toBeVisible();
 	await page.keyboard.press('Escape');

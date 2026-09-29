@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as architecture from "../architecture.js";
 import type * as notes from "../notes.js";
 import type * as starter from "../starter.js";
 
@@ -18,6 +19,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  architecture: typeof architecture;
   notes: typeof notes;
   starter: typeof starter;
 }>;

@@ -1,25 +1,27 @@
 {
-	"name": "svelte-convex-starter",
+	"name": "manef-architecture",
 	"private": true,
-	"version": "0.6.1",
-	"description": "Svelte 5 Runes, SvelteKit, Bun and Convex starter with typed feature slices and an adaptive app shell.",
+	"version": "0.1.0",
+	"description": "Reusable MANEF architecture inventory and graph explorer for SvelteKit and Next.js consumers.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/rahmanef63/template-svelte-convex-starter.git"
+		"url": "git+https://github.com/official-manef/manef-architecture.git"
 	},
 	"bugs": {
-		"url": "https://github.com/rahmanef63/template-svelte-convex-starter/issues"
+		"url": "https://github.com/official-manef/manef-architecture/issues"
 	},
-	"homepage": "https://github.com/rahmanef63/template-svelte-convex-starter#readme",
+	"homepage": "https://architecture.manef.dev",
 	"keywords": [
+		"manef",
+		"architecture",
+		"graph",
+		"inventory",
 		"svelte",
 		"sveltekit",
-		"bun",
 		"convex",
 		"typescript",
-		"starter",
-		"template"
+		"modular-feature"
 	],
 	"type": "module",
 	"scripts": {

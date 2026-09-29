@@ -1,0 +1,11 @@
+{
+	"slug": "architecture-inventory",
+	"version": "0.1.0",
+	"kind": "slice",
+	"entry": "slices/architecture-inventory/index.ts",
+	"routeAdapter": "src/routes/+page.svelte",
+	"backend": {
+		"provider": "convex",
+		"optional": true
+	}
+}

@@ -1,0 +1,13 @@
+{
+	"slug": "architecture-inventory",
+	"version": "0.1.0",
+	"title": "MANEF Architecture Inventory",
+	"description": "Framework-neutral architecture graph core with a Svelte 5 workspace adapter.",
+	"frameworks": ["typescript", "svelte-sveltekit", "nextjs-core"],
+	"contract": {
+		"publicBarrel": "slices/architecture-inventory/index.ts",
+		"core": ["types.ts", "lib/graph.ts", "lib/inventory.ts"],
+		"portable": true,
+		"backend": "optional-convex-cloud"
+	}
+}

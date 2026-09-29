@@ -1,7 +1,7 @@
 {
-  "name": "Svelte Convex Starter",
-  "short_name": "Svelte Convex",
-  "description": "A SvelteKit and Bun starter with example screens, Convex setup, and guides for building your application.",
+  "name": "MANEF Architecture",
+  "short_name": "MANEF",
+  "description": "Explore the public MANEF service architecture and its connected inventory.",
   "lang": "en",
   "start_url": "/",
   "display": "standalone",

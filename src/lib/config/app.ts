@@ -1,17 +1,16 @@
 // Public, build-time branding only. Never put secrets or per-user state here.
 export const appConfig = {
-	name: 'Svelte Convex Starter',
-	shortName: 'Svelte Convex',
-	description:
-		'A SvelteKit and Bun starter with example screens, Convex setup, and guides for building your application.',
+	name: 'MANEF Architecture',
+	shortName: 'MANEF',
+	description: 'Explore the public MANEF service architecture and its connected inventory.',
 	locale: 'en',
 	themeColor: '#171717',
 	backgroundColor: '#fafafa',
-	tagline: 'Application starter',
+	tagline: 'Architecture inventory',
 	landing: {
-		badge: 'Svelte + Bun + Convex',
-		title: 'Build your Svelte app from here.',
-		description: 'Explore the example screens, then connect your own Convex backend.',
-		action: 'Open starter'
+		badge: 'MANEF Architecture',
+		title: 'Explore the MANEF architecture.',
+		description: 'A reusable, interactive map of MANEF public services.',
+		action: 'Explore architecture'
 	}
 } as const;
