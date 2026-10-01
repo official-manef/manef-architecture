@@ -11,7 +11,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 		transformPageChunk: ({ html }) => html.replace('%app.locale%', appConfig.locale)
 	});
 	response.headers.set('X-Content-Type-Options', 'nosniff');
-	response.headers.set('X-Frame-Options', 'DENY');
+	// Allow same-origin framing so the diagram can be embedded in sibling MANEF surfaces.
+	// Cross-origin embedding remains governed by the Content-Security-Policy frame-ancestors.
+	response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+	if (!response.headers.has('Content-Security-Policy'))
+		response.headers.set('Content-Security-Policy', "frame-ancestors 'self' https://*.manef.dev https://mso.rahmanef.com");
 	if (!response.headers.has('Referrer-Policy'))
 		response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 	response.headers.set('X-Request-Id', event.locals.requestId);

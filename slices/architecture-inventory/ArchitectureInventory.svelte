@@ -19,6 +19,7 @@
 		ArchitectureNode,
 		ArchitecturePort,
 		DiagramMode,
+		Point,
 		TraceMode
 	} from './types';
 
@@ -40,6 +41,10 @@
 	let jsonMessage = $state('');
 	let zoom = $state(0.72);
 	let pan = $state({ x: 32, y: 28 });
+	let overrides = $state<Record<string, Point>>({});
+	let nodeDrag = $state<{ nodeId: string; pointerId: number; offsetX: number; offsetY: number } | null>(
+		null
+	);
 	let panStart = $state<{
 		pointerId: number;
 		x: number;
@@ -50,6 +55,11 @@
 	let viewport = $state<HTMLDivElement | null>(null);
 
 	const positions = $derived(layoutGraph(graph, diagramMode));
+	const basePositions = $derived(
+		Object.fromEntries(
+			graph.nodes.map((node) => [node.id, overrides[node.id] ?? positions[node.id] ?? { x: 0, y: 0 }])
+		)
+	);
 	const trace = $derived(
 		selectedNodeId ? traceGraph(graph, [selectedNodeId], traceMode) : { nodeIds: [], edgeIds: [] }
 	);
@@ -201,8 +211,8 @@
 	}
 
 	function edgePath(edge: ArchitectureEdge) {
-		const source = positions[edge.source] ?? { x: 0, y: 0 };
-		const target = positions[edge.target] ?? { x: 0, y: 0 };
+		const source = basePositions[edge.source] ?? { x: 0, y: 0 };
+		const target = basePositions[edge.target] ?? { x: 0, y: 0 };
 		const x1 = source.x + 210;
 		const y1 = source.y + 58;
 		const x2 = target.x;
@@ -210,6 +220,33 @@
 		if (diagramMode === 'graph') return `M ${x1} ${y1} L ${x2} ${y2}`;
 		const bend = Math.max(70, Math.abs(x2 - x1) * 0.42);
 		return `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`;
+	}
+
+	function startNodeDrag(event: PointerEvent, nodeId: string) {
+		const start = basePositions[nodeId] ?? { x: 0, y: 0 };
+		nodeDrag = {
+			nodeId,
+			pointerId: event.pointerId,
+			// grab offset in screen space: distance from pointer to node's rendered top-left
+			offsetX: event.clientX - (pan.x + start.x * zoom),
+			offsetY: event.clientY - (pan.y + start.y * zoom)
+		};
+		event.stopPropagation();
+	}
+
+	function moveNodeDrag(event: PointerEvent) {
+		if (!nodeDrag || nodeDrag.pointerId !== event.pointerId) return;
+		overrides = {
+			...overrides,
+			[nodeDrag.nodeId]: {
+				x: (event.clientX - pan.x - nodeDrag.offsetX) / zoom,
+				y: (event.clientY - pan.y - nodeDrag.offsetY) / zoom
+			}
+		};
+	}
+
+	function stopNodeDrag(event: PointerEvent) {
+		if (nodeDrag?.pointerId === event.pointerId) nodeDrag = null;
 	}
 
 	function startPan(event: PointerEvent) {
@@ -361,9 +398,18 @@
 				aria-label="MANEF architecture graph canvas"
 				bind:this={viewport}
 				onpointerdown={startPan}
-				onpointermove={movePan}
-				onpointerup={stopPan}
-				onpointercancel={stopPan}
+				onpointermove={(event) => {
+					moveNodeDrag(event);
+					movePan(event);
+				}}
+				onpointerup={(event) => {
+					stopNodeDrag(event);
+					stopPan(event);
+				}}
+				onpointercancel={(event) => {
+					stopNodeDrag(event);
+					stopPan(event);
+				}}
 				onwheel={handleWheel}
 			>
 				<div class="world" style={worldStyle}>
@@ -400,7 +446,11 @@
 								class:hot={highlightedNodeIds.has(node.id)}
 								class:selected={selectedNodeId === node.id}
 								class:dim={!!selectedNodeId && !highlightedNodeIds.has(node.id)}
-								style={`left: ${positions[node.id]?.x ?? 0}px; top: ${positions[node.id]?.y ?? 0}px;`}
+								style={`left: ${basePositions[node.id]?.x ?? 0}px; top: ${basePositions[node.id]?.y ?? 0}px;`}
+								onpointerdown={(event) => {
+									if (event.target instanceof Element && event.target.closest('[data-interactive]')) return;
+									startNodeDrag(event, node.id);
+								}}
 							>
 								<div class="node-head">
 									<Button
