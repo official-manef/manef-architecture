@@ -107,7 +107,7 @@ test('branding, sharing metadata and asset files agree across navigation', async
 		'href',
 		'/auth/login'
 	);
-	await page.getByRole('button', { name: 'Open diagram', exact: true }).press('Enter');
+	await page.getByRole('link', { name: 'Open diagram', exact: true }).press('Enter');
 	await expect(page).toHaveURL(/\/app$/);
 	await expect(page).toHaveTitle(appConfig.name);
 	await expect(
@@ -131,7 +131,7 @@ test('fresh clone boots, opens live-data and preserves keyboard navigation', asy
 		'href',
 		'/auth/login'
 	);
-	await page.getByRole('button', { name: 'Open diagram', exact: true }).press('Enter');
+	await page.getByRole('link', { name: 'Open diagram', exact: true }).press('Enter');
 	await expect(page).toHaveURL(/\/app$/);
 	await expect(page).toHaveTitle(appConfig.name);
 	await expect(page.getByRole('heading', { level: 1, name: appConfig.name })).toBeVisible();
