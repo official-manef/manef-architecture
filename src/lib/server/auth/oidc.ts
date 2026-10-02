@@ -1,11 +1,19 @@
 import * as client from 'openid-client';
 import type { AuthConfig } from './config';
+import { completeWorkosAuthorization, refreshWorkosIdentity, WORKOS_ORIGIN } from './workos';
 
 export const GOOGLE_ISSUER = 'https://accounts.google.com';
-export type AuthTransaction = { verifier: string; state: string; nonce: string };
+export type AuthTransaction = {
+	verifier: string;
+	state: string;
+	nonce: string;
+	provider?: 'google' | 'workos';
+	clientId?: string;
+};
 export type IdentityTokens = {
 	subject: string;
 	email?: string;
+	issuer?: string;
 	idToken: string;
 	idTokenExpiresAt: number;
 	refreshToken?: string;
@@ -37,12 +45,27 @@ function identity(tokens: client.TokenEndpointResponse & client.TokenEndpointRes
 }
 
 export async function beginAuthorization(config: AuthConfig) {
-	const oidc = await configuration(config);
-	const transaction = {
+	const transaction: AuthTransaction = {
 		verifier: client.randomPKCECodeVerifier(),
 		state: client.randomState(),
-		nonce: client.randomNonce()
+		nonce: client.randomNonce(),
+		provider: config.provider,
+		clientId: config.clientId
 	};
+	if (config.provider === 'workos') {
+		const url = new URL(`${WORKOS_ORIGIN}/user_management/authorize`);
+		url.search = new URLSearchParams({
+			client_id: config.clientId,
+			redirect_uri: config.redirectUri,
+			response_type: 'code',
+			provider: 'authkit',
+			state: transaction.state,
+			code_challenge: await client.calculatePKCECodeChallenge(transaction.verifier),
+			code_challenge_method: 'S256'
+		}).toString();
+		return { url, transaction };
+	}
+	const oidc = await configuration(config);
 	const url = client.buildAuthorizationUrl(oidc, {
 		redirect_uri: config.redirectUri,
 		scope: 'openid email',
@@ -61,6 +84,9 @@ export async function completeAuthorization(
 	url: URL,
 	transaction: AuthTransaction
 ): Promise<IdentityTokens> {
+	if (config.provider === 'workos') return completeWorkosAuthorization(config, url, transaction);
+	if (transaction.provider && transaction.provider !== config.provider)
+		throw new Error('Authentication provider changed.');
 	const oidc = await configuration(config);
 	return identity(
 		await client.authorizationCodeGrant(oidc, url, {
@@ -76,6 +102,7 @@ export async function refreshIdentity(
 	config: AuthConfig,
 	current: IdentityTokens
 ): Promise<IdentityTokens> {
+	if (config.provider === 'workos') return refreshWorkosIdentity(config, current);
 	if (!current.refreshToken) throw new Error('Sign in again to renew this session.');
 	const oidc = await configuration(config);
 	const tokens = await client.refreshTokenGrant(oidc, current.refreshToken);

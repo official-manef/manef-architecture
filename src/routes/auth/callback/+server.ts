@@ -16,5 +16,5 @@ export const GET: RequestHandler = async (event) => {
 		// Provider responses can contain credentials; do not echo or log the raw exception.
 		error(400, 'Sign-in could not be verified. Start sign-in again.');
 	}
-	redirect(303, '/apps/notes');
+	redirect(303, '/app');
 };

@@ -29,7 +29,8 @@ export async function statusMcpResponse(request: Request, parsedBody: unknown) {
 	server.registerTool(
 		'graph_status',
 		{
-			description: 'Read the MANEF architecture graph identity and its current node/edge counts. Read-only.',
+			description:
+				'Read the MANEF architecture graph identity and its current node/edge counts. Read-only.',
 			inputSchema: z.object({}).strict(),
 			annotations: {
 				readOnlyHint: true,
@@ -78,8 +79,7 @@ export async function statusMcpResponse(request: Request, parsedBody: unknown) {
 		async ({ tag, status }) => {
 			const nodes = defaultGraph.nodes.filter(
 				(node) =>
-					(!tag || node.tags.includes(tag)) &&
-					(!status || (node.status ?? 'active') === status)
+					(!tag || node.tags.includes(tag)) && (!status || (node.status ?? 'active') === status)
 			);
 			return { content: [{ type: 'text', text: JSON.stringify(nodes) }] };
 		}

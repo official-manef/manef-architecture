@@ -110,6 +110,7 @@ async function lint(code: string, filePath = 'src/lib/config/metadata.ts') {
 	return result.messages.map((message) => message.ruleId);
 }
 
+// This integration test cold-starts the actual TypeScript project service on CI.
 test('actual project config detects floating promises, async callbacks and incomplete unions', async () => {
 	expect(await lint('Promise.resolve(1);')).toContain('@typescript-eslint/no-floating-promises');
 	expect(await lint('void Promise.resolve(1);')).toContain(
@@ -128,7 +129,7 @@ test('actual project config detects floating promises, async callbacks and incom
 			"export async function run() { await Promise.resolve(); }\nexport function label(state: 'pending' | 'paid') { switch (state) { case 'pending': return 'Pending'; case 'paid': return 'Paid'; } }"
 		)
 	).toEqual([]);
-});
+}, 15_000);
 
 test('authored Svelte scripts receive typed async checks and raw HTML is rejected', async () => {
 	const file = 'slices/settings/components/settings-screen.svelte';

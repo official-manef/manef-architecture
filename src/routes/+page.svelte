@@ -2,7 +2,7 @@
 	import { appConfig } from '$lib/config/app';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
-	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	const session = $derived(page.data.auth?.session);
 </script>
@@ -17,12 +17,16 @@
 		<h1>{appConfig.landing.title}</h1>
 		<p class="lead">{appConfig.landing.description}</p>
 		<div class="actions">
-			<Button size="lg" onclick={() => goto('/app')}>Open diagram</Button>
+			<Button size="lg" href={resolve('/app')}>Open diagram</Button>
 			{#if session}
 				<span class="signed-in">Signed in as {session.email ?? session.subject}</span>
-				<Button variant="outline" size="lg" onclick={() => goto('/auth/logout')}>Sign out</Button>
+				<form method="POST" action="/auth/logout">
+					<Button variant="outline" size="lg" type="submit">Sign out</Button>
+				</form>
 			{:else}
-				<Button variant="outline" size="lg" onclick={() => goto('/auth/login')}>Sign in</Button>
+				<Button variant="outline" size="lg" href="/auth/login" data-sveltekit-reload>
+					Sign in with MANEF
+				</Button>
 			{/if}
 		</div>
 	</div>

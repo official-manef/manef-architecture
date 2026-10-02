@@ -2,7 +2,7 @@ import { siteOrigin } from '$lib/config/metadata';
 
 export type AuthConfig = {
 	enabled: true;
-	provider: 'google';
+	provider: 'google' | 'workos';
 	clientId: string;
 	clientSecret: string;
 	sessionKey: Uint8Array;
@@ -17,7 +17,8 @@ export function resolveAuthConfig(
 	const flag = env.AUTH_ENABLED || 'false';
 	if (flag === 'false') return { enabled: false };
 	if (flag !== 'true') throw new Error('AUTH_ENABLED must be true or false.');
-	if ((env.AUTH_PROVIDER || 'google') !== 'google')
+	const provider = env.AUTH_PROVIDER || 'google';
+	if (provider !== 'google' && provider !== 'workos')
 		throw new Error('Unsupported AUTH_PROVIDER; implement and verify its OIDC integration first.');
 	const required = (key: string) => {
 		const value = env[key];
@@ -30,9 +31,9 @@ export function resolveAuthConfig(
 	const origin = siteOrigin(required('PUBLIC_SITE_URL'))!;
 	return {
 		enabled: true,
-		provider: 'google',
-		clientId: required('AUTH_CLIENT_ID'),
-		clientSecret: required('AUTH_CLIENT_SECRET'),
+		provider,
+		clientId: required(provider === 'workos' ? 'WORKOS_CLIENT_ID' : 'AUTH_CLIENT_ID'),
+		clientSecret: required(provider === 'workos' ? 'WORKOS_API_KEY' : 'AUTH_CLIENT_SECRET'),
 		sessionKey: new Uint8Array(Buffer.from(secret, 'base64url')),
 		origin,
 		redirectUri: `${origin}/auth/callback`,

@@ -8,5 +8,5 @@ export const POST: RequestHandler = (event) => {
 	requireAppOrigin(event.request, config.origin);
 	clearSession(event, config);
 	event.setHeaders({ 'cache-control': 'no-store' });
-	redirect(303, '/apps/notes');
+	redirect(303, '/');
 };
