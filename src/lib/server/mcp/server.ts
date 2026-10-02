@@ -9,7 +9,9 @@ import {
 	layoutGraph,
 	searchInventory,
 	traceGraph,
-	validateGraph
+	validateGraph,
+	buildDiagramViewUrl,
+	tagsMatchFacets
 } from '../../../../slices/architecture-inventory/index';
 
 function graphSnapshot() {
@@ -179,6 +181,137 @@ export async function statusMcpResponse(request: Request, parsedBody: unknown) {
 				}
 			]
 		})
+	);
+
+	server.registerTool(
+		'graph_query',
+		{
+			description:
+				'Query the MANEF context graph by free text, namespaced facets and status. Tags in one namespace are OR-ed; namespaces are AND-ed. Returns the matching bounded subgraph and a navigable view URL. Read-only.',
+			inputSchema: z
+				.object({
+					query: z.string().max(200).default(''),
+					tags: z.array(z.string().max(100)).max(30).default([]),
+					status: z.enum(['active', 'proposed', 'private']).optional()
+				})
+				.strict(),
+			annotations: {
+				readOnlyHint: true,
+				destructiveHint: false,
+				idempotentHint: true,
+				openWorldHint: false
+			}
+		},
+		async ({ query, tags, status }) => {
+			const needle = query.trim().toLowerCase();
+			const nodes = defaultGraph.nodes.filter((node) => {
+				const textMatch =
+					!needle ||
+					[node.label, node.subtitle ?? '', ...node.tags].join(' ').toLowerCase().includes(needle);
+				return (
+					textMatch &&
+					tagsMatchFacets(node.tags, tags) &&
+					(!status || (node.status ?? 'active') === status)
+				);
+			});
+			const nodeIds = new Set(nodes.map((node) => node.id));
+			const edges = defaultGraph.edges.filter(
+				(edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target)
+			);
+			return {
+				content: [
+					{
+						type: 'text',
+						text: JSON.stringify({
+							nodes,
+							edges,
+							viewUrl: buildDiagramViewUrl({
+								graph: { schemaVersion: 1, nodes, edges },
+								seeds: [],
+								mode: 'graph',
+								trace: 'component',
+								focus: false
+							})
+						})
+					}
+				]
+			};
+		}
+	);
+
+	server.registerTool(
+		'graph_build_view',
+		{
+			description:
+				'Build a navigable diagram.manef.dev URL for the bundled context graph with search, facet, seed, layout, trace and focus state. Read-only.',
+			inputSchema: z
+				.object({
+					query: z.string().max(200).default(''),
+					tags: z.array(z.string().max(100)).max(30).default([]),
+					seeds: z.array(z.string().max(200)).max(30).default([]),
+					mode: z.enum(['flow', 'graph']).default('graph'),
+					trace: z.enum(['direct', 'component']).default('component'),
+					focus: z.boolean().default(false)
+				})
+				.strict(),
+			annotations: {
+				readOnlyHint: true,
+				destructiveHint: false,
+				idempotentHint: true,
+				openWorldHint: false
+			}
+		},
+		async ({ query, tags, seeds, mode, trace, focus }) => ({
+			content: [
+				{
+					type: 'text',
+					text: JSON.stringify({
+						url: buildDiagramViewUrl({ query, tags, seeds, mode, trace, focus })
+					})
+				}
+			]
+		})
+	);
+
+	server.registerTool(
+		'graph_create_portable_view',
+		{
+			description:
+				'Validate a bounded MANEF graph supplied by any agent/client and return a stateless navigable diagram.manef.dev URL. This does not persist or mutate server data.',
+			inputSchema: z
+				.object({
+					graph: z.unknown(),
+					query: z.string().max(200).default(''),
+					tags: z.array(z.string().max(100)).max(30).default([]),
+					seeds: z.array(z.string().max(200)).max(30).default([]),
+					mode: z.enum(['flow', 'graph']).default('graph'),
+					trace: z.enum(['direct', 'component']).default('component'),
+					focus: z.boolean().default(false)
+				})
+				.strict(),
+			annotations: {
+				readOnlyHint: true,
+				destructiveHint: false,
+				idempotentHint: true,
+				openWorldHint: false
+			}
+		},
+		async ({ graph, query, tags, seeds, mode, trace, focus }) => {
+			if (!validateGraph(graph)) throw new Error('Graph does not match the MANEF graph contract.');
+			return {
+				content: [
+					{
+						type: 'text',
+						text: JSON.stringify({
+							url: buildDiagramViewUrl({ graph, query, tags, seeds, mode, trace, focus }),
+							nodeCount: graph.nodes.length,
+							edgeCount: graph.edges.length,
+							persisted: false
+						})
+					}
+				]
+			};
+		}
 	);
 
 	const transport = new WebStandardStreamableHTTPServerTransport({

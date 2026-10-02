@@ -145,6 +145,9 @@ test('official stateless MCP server advertises read-only graph tools', async () 
 	const names = tools.map((tool: { name: string }) => tool.name);
 	expect(names).toContain('graph_status');
 	expect(names).toContain('graph_trace');
+	expect(names).toContain('graph_query');
+	expect(names).toContain('graph_build_view');
+	expect(names).toContain('graph_create_portable_view');
 	for (const tool of tools) {
 		expect(tool.annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false });
 	}
@@ -156,4 +159,16 @@ test('official stateless MCP server advertises read-only graph tools', async () 
 	};
 	const output = await (await statusMcpResponse(request(call), call)).json();
 	expect(JSON.parse(output.result.content[0].text)).toMatchObject({ schemaVersion: 1 });
+	const query = {
+		...call,
+		params: { name: 'graph_query', arguments: { status: 'proposed' } }
+	};
+	const queryOutput = await (await statusMcpResponse(request(query), query)).json();
+	const result = JSON.parse(queryOutput.result.content[0].text);
+	expect(result.nodes.every((node: { status: string }) => node.status === 'proposed')).toBe(true);
+	expect(JSON.parse(new URL(result.viewUrl).searchParams.get('graph')!)).toEqual({
+		schemaVersion: 1,
+		nodes: result.nodes,
+		edges: result.edges
+	});
 });

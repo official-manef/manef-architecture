@@ -12,3 +12,12 @@ export {
 } from './lib/graph';
 export { addInventoryItem, materializeInventoryItem, searchInventory } from './lib/inventory';
 export type * from './types';
+
+export {
+	buildDiagramViewUrl,
+	parseDiagramView,
+	DEFAULT_DIAGRAM_ORIGIN,
+	PORTABLE_GRAPH_MAX_CHARS,
+	tagGroup,
+	tagsMatchFacets
+} from './lib/share';
