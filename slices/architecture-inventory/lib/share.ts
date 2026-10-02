@@ -41,7 +41,8 @@ export function buildDiagramViewUrl(
 	if (view.trace) url.searchParams.set('trace', view.trace);
 	if (view.focus) url.searchParams.set('focus', '1');
 	if (view.graph) {
-		if (!validateGraph(view.graph)) throw new Error('Graph does not match the MANEF graph contract.');
+		if (!validateGraph(view.graph))
+			throw new Error('Graph does not match the MANEF graph contract.');
 		const payload = JSON.stringify(view.graph);
 		if (payload.length > PORTABLE_GRAPH_MAX_CHARS) {
 			throw new Error(
@@ -56,6 +57,9 @@ export function buildDiagramViewUrl(
 export function parseDiagramView(search: string): DiagramView {
 	const params = new URLSearchParams(search);
 	const graphPayload = params.get('graph');
+	if (graphPayload && graphPayload.length > PORTABLE_GRAPH_MAX_CHARS) {
+		throw new Error('Portable graph exceeds the shared-link size limit.');
+	}
 	const mode = params.get('mode');
 	const trace = params.get('trace');
 	return {

@@ -183,7 +183,6 @@ export async function statusMcpResponse(request: Request, parsedBody: unknown) {
 		})
 	);
 
-
 	server.registerTool(
 		'graph_query',
 		{
@@ -227,8 +226,7 @@ export async function statusMcpResponse(request: Request, parsedBody: unknown) {
 							nodes,
 							edges,
 							viewUrl: buildDiagramViewUrl({
-								query,
-								tags,
+								graph: { schemaVersion: 1, nodes, edges },
 								seeds: [],
 								mode: 'graph',
 								trace: 'component',

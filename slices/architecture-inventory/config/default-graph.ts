@@ -33,9 +33,22 @@ export const defaultGraph: ArchitectureGraph = {
 			'Interactive architecture + agent context graph',
 			2,
 			'active',
-			['manef', 'architecture', 'product', 'project:manef-diagram', 'platform:vercel', 'kind:context-graph']
+			[
+				'manef',
+				'architecture',
+				'product',
+				'project:manef-diagram',
+				'platform:vercel',
+				'kind:context-graph'
+			]
 		),
-		node('mso', 'mso.manef.dev', 'Manef Shell OS', 2, 'active', ['manef', 'product', 'ai', 'project:mso', 'kind:product']),
+		node('mso', 'mso.manef.dev', 'Manef Shell OS', 2, 'active', [
+			'manef',
+			'product',
+			'ai',
+			'project:mso',
+			'kind:product'
+		]),
 		node('models', 'models.manef.dev', 'Model catalog and routing', 2, 'proposed', [
 			'manef',
 			'product',

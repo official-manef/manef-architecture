@@ -28,4 +28,6 @@ The UI can copy the current edited graph plus active view state as a portable UR
 
 The MCP endpoint is `/api/mcp/server`. Existing read-only graph tools remain available. Context-graph tools add faceted query and navigable URL generation. Portable graph creation is stateless: the graph is encoded into the URL and validated by the same graph contract before rendering.
 
-Durable personal snapshots remain in Convex. Agent-write persistence should use a dedicated server-side authorization boundary with provenance and access control rather than exposing Convex mutations directly to arbitrary clients.
+Portable links contain the graph in their query string. Share only content intended for every recipient; links can appear in browser history and host logs. Invalid or oversized incoming graphs show the default graph with a recoverable error. These links do not save personal snapshots to Convex.
+
+Owner-scoped Convex snapshots are a separate optional backend capability. Agent-write persistence still needs a dedicated server-side authorization boundary with provenance and access control rather than exposing Convex mutations directly to arbitrary clients.

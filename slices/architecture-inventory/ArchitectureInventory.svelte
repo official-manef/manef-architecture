@@ -30,15 +30,19 @@
 	let graph = $state<ArchitectureGraph>(cloneGraph(defaultGraph));
 	let hydrated = $state(false);
 	onMount(() => {
-		const view = parseDiagramView(window.location.search);
-		if (view.graph) graph = view.graph;
-		search = view.query;
-		activeTags = view.tags;
-		diagramMode = view.mode;
-		traceMode = view.trace;
-		focusMode = view.focus;
-		if (view.seeds[0] && graph.nodes.some((node) => node.id === view.seeds[0])) {
-			selectedNodeId = view.seeds[0];
+		try {
+			const view = parseDiagramView(window.location.search);
+			if (view.graph) graph = view.graph;
+			search = view.query;
+			activeTags = view.tags;
+			diagramMode = view.mode;
+			traceMode = view.trace;
+			focusMode = view.focus;
+			if (view.seeds[0] && graph.nodes.some((node) => node.id === view.seeds[0])) {
+				selectedNodeId = view.seeds[0];
+			}
+		} catch {
+			jsonMessage = 'This shared graph link is invalid or too large. The default graph is shown.';
 		}
 		jsonText = JSON.stringify(graph, null, 2);
 		hydrated = true;
@@ -91,11 +95,14 @@
 	const allTags = $derived([...new Set(graph.nodes.flatMap((node) => node.tags))].sort());
 	const tagGroups = $derived(
 		Object.entries(
-			allTags.reduce<Record<string, string[]>>((groups, tag) => {
-				const group = tagGroup(tag);
-				groups[group] = [...(groups[group] ?? []), tag];
-				return groups;
-			}, {})
+			allTags.reduce<Record<string, string[]>>(
+				(groups, tag) => {
+					const group = tagGroup(tag);
+					groups[group] = [...(groups[group] ?? []), tag];
+					return groups;
+				},
+				Object.create(null) as Record<string, string[]>
+			)
 		).sort(([a], [b]) => a.localeCompare(b))
 	);
 	const inventoryItems = $derived(searchInventory(defaultInventory, inventorySearch));
@@ -252,9 +259,9 @@
 				focus: focusMode
 			});
 			await navigator.clipboard.writeText(url);
-			jsonMessage = "Portable graph link copied.";
+			jsonMessage = 'Portable graph link copied.';
 		} catch (error) {
-			jsonMessage = error instanceof Error ? error.message : "Could not create a portable link.";
+			jsonMessage = error instanceof Error ? error.message : 'Could not create a portable link.';
 		}
 	}
 

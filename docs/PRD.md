@@ -7,10 +7,10 @@ Provide one reusable architecture/inventory feature that visualizes MANEF produc
 ## Canonical implementation
 
 - Product: MANEF Architecture Inventory
-- Production origin: `https://architecture.manef.dev`
+- Production origin: `https://diagram.manef.dev`
 - Canonical UI: Svelte 5 + SvelteKit
 - Backend: Convex Cloud, optional until configured
-- Runtime hosting: adapter-node on Dokploy
+- Runtime hosting: Vercel, with adapter-node available for separately managed hosts
 - Reusable contract: `slices/architecture-inventory/index.ts`
 
 ## Acceptance
@@ -23,3 +23,5 @@ Provide one reusable architecture/inventory feature that visualizes MANEF produc
 6. Private repository/domain inventory is never hardcoded into the reusable public seed.
 7. Convex persistence remains opt-in and protected server-side.
 8. Release gates include Bun frozen install, check, lint, unit tests, production build and browser smoke when available.
+9. Portable links restore validated graph data and view filters; invalid or oversized links show a recoverable error with the default graph.
+10. Namespaced tag facets combine alternatives within a namespace and intersect namespaces, including arbitrary user-supplied namespace names.
