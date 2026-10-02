@@ -2,11 +2,19 @@
 
 ## Product binding — MANEF Architecture
 
-This starter is now bound to the MANEF Architecture product. The authoritative PRD is `docs/PRD.md`. Production origin is `https://architecture.manef.dev`; Svelte 5 is the reference renderer, while `slices/architecture-inventory/` owns the framework-neutral TypeScript contract reusable from SvelteKit and Next.js. Convex Cloud is optional persistence and Dokploy is the production Node/container runtime. Private infrastructure inventory must never be copied into the bundled public seed.
+This starter is now bound to the MANEF Architecture product. The authoritative PRD is `docs/PRD.md`. Production origin is `https://diagram.manef.dev`; Svelte 5 is the reference renderer, while `slices/architecture-inventory/` owns the framework-neutral TypeScript contract reusable from SvelteKit and Next.js. Convex Cloud is optional persistence. Production currently uses the Vercel adapter; the Node adapter supports Dokploy. Private infrastructure inventory must never be copied into the bundled public seed.
 
 This is the maintained map of shared invariants and their authoritative files. Read it
 at the start of each session. It records the current template, not a hypothetical client
 application. Detailed implementation guidance lives in [architecture](docs/architecture.md).
+
+## Authentication provider boundary
+
+MANEF targets the existing WorkOS project for its shared production identity. The WorkOS adapter and
+rollout requirements are documented in [WorkOS sign-in](docs/workos-login.md). Direct
+Google OIDC remains a compatibility opt-in; no Google-owned data is silently migrated
+by email. Private ownership uses the verified issuer and subject. Hosted login, backend
+JWT configuration, and real production consent are separate acceptance gates.
 
 ## Current baseline
 
