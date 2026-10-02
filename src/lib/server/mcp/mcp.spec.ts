@@ -127,7 +127,7 @@ test('incomplete discovery and remote tool errors fail without returning provide
 	expect(requests.some(({ method }) => method === 'DELETE')).toBe(true);
 });
 
-test('official stateless MCP server advertises only read-only template status', async () => {
+test('official stateless MCP server advertises read-only graph tools', async () => {
 	const request = (body: unknown) =>
 		new Request('https://app.example.com/api/mcp/server', {
 			method: 'POST',
@@ -141,17 +141,19 @@ test('official stateless MCP server advertises only read-only template status', 
 	const list = { jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} };
 	const response = await statusMcpResponse(request(list), list);
 	const data = await response.json();
-	expect(data.result.tools).toHaveLength(1);
-	expect(data.result.tools[0]).toMatchObject({
-		name: 'starter_status',
-		annotations: { readOnlyHint: true, destructiveHint: false }
-	});
+	const tools = data.result.tools;
+	const names = tools.map((tool: { name: string }) => tool.name);
+	expect(names).toContain('graph_status');
+	expect(names).toContain('graph_trace');
+	for (const tool of tools) {
+		expect(tool.annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false });
+	}
 	const call = {
 		jsonrpc: '2.0',
 		id: 2,
 		method: 'tools/call',
-		params: { name: 'starter_status', arguments: {} }
+		params: { name: 'graph_status', arguments: {} }
 	};
 	const output = await (await statusMcpResponse(request(call), call)).json();
-	expect(JSON.parse(output.result.content[0].text)).toMatchObject({ backend: 'convex' });
+	expect(JSON.parse(output.result.content[0].text)).toMatchObject({ schemaVersion: 1 });
 });
