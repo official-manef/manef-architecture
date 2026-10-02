@@ -1,17 +1,17 @@
 {
-	"name": "manef-architecture",
+	"name": "manef-diagram",
 	"private": true,
 	"version": "0.1.0",
 	"description": "Reusable MANEF architecture inventory and graph explorer for SvelteKit and Next.js consumers.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/official-manef/manef-architecture.git"
+		"url": "git+https://github.com/official-manef/manef-diagram.git"
 	},
 	"bugs": {
-		"url": "https://github.com/official-manef/manef-architecture/issues"
+		"url": "https://github.com/official-manef/manef-diagram/issues"
 	},
-	"homepage": "https://architecture.manef.dev",
+	"homepage": "https://diagram.manef.dev",
 	"keywords": [
 		"manef",
 		"architecture",
