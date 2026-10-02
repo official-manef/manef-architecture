@@ -5,6 +5,7 @@ import { EncryptJWT, jwtDecrypt } from 'jose';
 import { z } from 'zod';
 import { resolveAuthConfig, type AuthConfig } from './config';
 import { GOOGLE_ISSUER, refreshIdentity, type AuthTransaction, type IdentityTokens } from './oidc';
+import { verifyWorkosAccessToken } from './workos';
 
 type AuthEvent = Pick<RequestEvent, 'cookies' | 'request' | 'url'>;
 export type Session = {
@@ -20,11 +21,16 @@ const COOKIE_LIMIT = 3800;
 const transactionSchema = z.object({
 	verifier: z.string().min(43).max(128),
 	state: z.string().min(32).max(128),
-	nonce: z.string().min(32).max(128)
+	nonce: z.string().min(32).max(128),
+	provider: z.enum(['google', 'workos']).optional(),
+	clientId: z.string().optional()
 });
 const recordSchema = z.object({
 	subject: z.string().min(1).max(255),
 	email: z.string().max(320).optional(),
+	issuer: z.string().optional(),
+	provider: z.enum(['google', 'workos']).optional(),
+	clientId: z.string().optional(),
 	idToken: z.string().min(1),
 	idTokenExpiresAt: z.number(),
 	refreshToken: z.string().optional(),
@@ -43,7 +49,8 @@ export function configuredAuth(): AuthConfig {
 }
 
 function cookieName(config: AuthConfig, purpose: 'session' | 'transaction') {
-	return `${config.secure ? '__Host-' : ''}starter-${purpose}`;
+	const prefix = config.provider === 'workos' ? 'manef-workos' : 'starter';
+	return `${config.secure ? '__Host-' : ''}${prefix}-${purpose}`;
 }
 
 function cookieOptions(config: AuthConfig) {
@@ -102,7 +109,7 @@ export async function consumeTransaction(event: AuthEvent, config: AuthConfig) {
 
 async function saveRecord(event: AuthEvent, config: AuthConfig, record: SessionRecord) {
 	let value = await seal(config, 'session', record, record.expiresAt);
-	// Google may return a large refresh token. Keep the bounded sign-in usable without renewal.
+	// Keep an oversized provider response usable without renewal, within the cookie limit.
 	if (value.length > COOKIE_LIMIT && record.refreshToken) {
 		delete record.refreshToken;
 		value = await seal(config, 'session', record, record.expiresAt);
@@ -122,6 +129,8 @@ export async function establishSession(
 ) {
 	await saveRecord(event, config, {
 		...tokens,
+		provider: config.provider,
+		clientId: config.clientId,
 		expiresAt: Math.floor(Date.now() / 1000) + SESSION_SECONDS
 	});
 }
@@ -145,6 +154,13 @@ async function readRecord(
 		return null;
 	}
 	let record = parsed.data;
+	if (
+		config.provider === 'workos' &&
+		(record.provider !== 'workos' || record.clientId !== config.clientId)
+	) {
+		clearSession(event, config);
+		return null;
+	}
 	const now = Math.floor(Date.now() / 1000);
 	if (record.expiresAt <= now) {
 		clearSession(event, config);
@@ -152,7 +168,11 @@ async function readRecord(
 	}
 	if (record.refreshToken && (forceRefreshToken || record.idTokenExpiresAt <= now + 60)) {
 		try {
-			record = { ...(await refreshIdentity(config, record)), expiresAt: record.expiresAt };
+			record = {
+				...record,
+				...(await refreshIdentity(config, record)),
+				expiresAt: record.expiresAt
+			};
 			await saveRecord(event, config, record);
 		} catch {
 			clearSession(event, config);
@@ -163,6 +183,15 @@ async function readRecord(
 		clearSession(event, config);
 		return null;
 	}
+	if (config.provider === 'workos') {
+		try {
+			const claims = await verifyWorkosAccessToken(config, record.idToken, record.subject);
+			if (claims.iss !== record.issuer) throw new Error('Session issuer changed.');
+		} catch {
+			clearSession(event, config);
+			return null;
+		}
+	}
 	return record;
 }
 
@@ -171,7 +200,7 @@ export async function readSession(event: AuthEvent): Promise<Session | null> {
 	if (!record) return null;
 	return {
 		subject: record.subject,
-		tokenIdentifier: `${GOOGLE_ISSUER}|${record.subject}`,
+		tokenIdentifier: `${record.issuer ?? GOOGLE_ISSUER}|${record.subject}`,
 		...(record.email ? { email: record.email } : {}),
 		expiresAt: record.expiresAt * 1000
 	};
