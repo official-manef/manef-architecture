@@ -20,9 +20,13 @@
 			<Button size="lg" onclick={() => goto('/app')}>Open diagram</Button>
 			{#if session}
 				<span class="signed-in">Signed in as {session.email ?? session.subject}</span>
-				<Button variant="outline" size="lg" onclick={() => goto('/auth/logout')}>Sign out</Button>
+				<form method="POST" action="/auth/logout">
+					<Button variant="outline" size="lg" type="submit">Sign out</Button>
+				</form>
 			{:else}
-				<Button variant="outline" size="lg" onclick={() => goto('/auth/login')}>Sign in</Button>
+				<Button variant="outline" size="lg" href="/auth/login" data-sveltekit-reload>
+					Sign in with MANEF
+				</Button>
 			{/if}
 		</div>
 	</div>
