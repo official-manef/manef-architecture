@@ -15,7 +15,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// Cross-origin embedding remains governed by the Content-Security-Policy frame-ancestors.
 	response.headers.set('X-Frame-Options', 'SAMEORIGIN');
 	if (!response.headers.has('Content-Security-Policy'))
-		response.headers.set('Content-Security-Policy', "frame-ancestors 'self' https://*.manef.dev https://mso.rahmanef.com");
+		response.headers.set(
+			'Content-Security-Policy',
+			"frame-ancestors 'self' https://*.manef.dev https://mso.rahmanef.com"
+		);
 	if (!response.headers.has('Referrer-Policy'))
 		response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 	response.headers.set('X-Request-Id', event.locals.requestId);

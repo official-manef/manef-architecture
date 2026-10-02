@@ -102,6 +102,13 @@ test('branding, sharing metadata and asset files agree across navigation', async
 		src: assets.appIcon.path,
 		sizes: `${assets.appIcon.width}x${assets.appIcon.height}`
 	});
+	await expect(page).toHaveTitle(`${appConfig.name} — ${appConfig.landing.title}`);
+	await expect(page.getByRole('link', { name: 'Sign in with MANEF' })).toHaveAttribute(
+		'href',
+		'/auth/login'
+	);
+	await page.getByRole('link', { name: 'Open diagram', exact: true }).press('Enter');
+	await expect(page).toHaveURL(/\/app$/);
 	await expect(page).toHaveTitle(appConfig.name);
 	await expect(
 		page.getByRole('application', { name: 'MANEF architecture graph canvas' })
@@ -119,6 +126,13 @@ test('fresh clone boots, opens live-data and preserves keyboard navigation', asy
 	});
 	const response = await page.goto('/');
 	expect(response?.status()).toBe(200);
+	await expect(page).toHaveTitle(`${appConfig.name} — ${appConfig.landing.title}`);
+	await expect(page.getByRole('link', { name: 'Sign in with MANEF' })).toHaveAttribute(
+		'href',
+		'/auth/login'
+	);
+	await page.getByRole('link', { name: 'Open diagram', exact: true }).press('Enter');
+	await expect(page).toHaveURL(/\/app$/);
 	await expect(page).toHaveTitle(appConfig.name);
 	await expect(page.getByRole('heading', { level: 1, name: appConfig.name })).toBeVisible();
 	expect(response?.headers()['x-content-type-options']).toBe('nosniff');

@@ -42,9 +42,12 @@
 	let zoom = $state(0.72);
 	let pan = $state({ x: 32, y: 28 });
 	let overrides = $state<Record<string, Point>>({});
-	let nodeDrag = $state<{ nodeId: string; pointerId: number; offsetX: number; offsetY: number } | null>(
-		null
-	);
+	let nodeDrag = $state<{
+		nodeId: string;
+		pointerId: number;
+		offsetX: number;
+		offsetY: number;
+	} | null>(null);
 	let panStart = $state<{
 		pointerId: number;
 		x: number;
@@ -57,7 +60,10 @@
 	const positions = $derived(layoutGraph(graph, diagramMode));
 	const basePositions = $derived(
 		Object.fromEntries(
-			graph.nodes.map((node) => [node.id, overrides[node.id] ?? positions[node.id] ?? { x: 0, y: 0 }])
+			graph.nodes.map((node) => [
+				node.id,
+				overrides[node.id] ?? positions[node.id] ?? { x: 0, y: 0 }
+			])
 		)
 	);
 	const trace = $derived(
@@ -448,7 +454,8 @@
 								class:dim={!!selectedNodeId && !highlightedNodeIds.has(node.id)}
 								style={`left: ${basePositions[node.id]?.x ?? 0}px; top: ${basePositions[node.id]?.y ?? 0}px;`}
 								onpointerdown={(event) => {
-									if (event.target instanceof Element && event.target.closest('[data-interactive]')) return;
+									if (event.target instanceof Element && event.target.closest('[data-interactive]'))
+										return;
 									startNodeDrag(event, node.id);
 								}}
 							>

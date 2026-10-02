@@ -1,4 +1,11 @@
-# Optional Google sign-in and private notes
+# Authentication and private notes
+
+For MANEF production, follow [WorkOS sign-in](workos-login.md). Google OAuth credentials
+stay in the MANEF WorkOS integration; the app uses its WorkOS credentials. The following
+sections document the retained direct-Google compatibility adapter, not the MANEF
+production rollout.
+
+## Direct Google compatibility adapter
 
 The starter includes a Google OpenID Connect flow and a small private Convex notes
 feature. `AUTH_ENABLED=false` is the default: a fresh clone needs no Google credentials.
