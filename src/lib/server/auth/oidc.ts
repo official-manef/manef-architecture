@@ -1,10 +1,6 @@
 import * as client from 'openid-client';
 import type { AuthConfig } from './config';
-import {
-	completeWorkosAuthorization,
-	refreshWorkosIdentity,
-	WORKOS_ORIGIN
-} from './workos';
+import { completeWorkosAuthorization, refreshWorkosIdentity, WORKOS_ORIGIN } from './workos';
 
 export const GOOGLE_ISSUER = 'https://accounts.google.com';
 export type AuthTransaction = {

@@ -15,18 +15,13 @@ const authenticationSchema = z.object({
 	refresh_token: z.string().min(1).max(16000).optional()
 });
 
-export async function verifyWorkosAccessToken(
-	config: AuthConfig,
-	token: string,
-	subject?: string
-) {
+export async function verifyWorkosAccessToken(config: AuthConfig, token: string, subject?: string) {
 	// Decoding selects a fixed validation policy; claims are not trusted before verification.
 	const untrusted = decodeJwt(token);
 	const scopedIssuer = `${WORKOS_ORIGIN}/user_management/${config.clientId}`;
 	const legacyIssuer = `${WORKOS_ORIGIN}/`;
 	const legacy = untrusted.iss === legacyIssuer;
-	if (!legacy && untrusted.iss !== scopedIssuer)
-		throw new Error('Invalid WorkOS token issuer.');
+	if (!legacy && untrusted.iss !== scopedIssuer) throw new Error('Invalid WorkOS token issuer.');
 	const jwks = createRemoteJWKSet(
 		new URL(`${WORKOS_ORIGIN}/sso/jwks/${encodeURIComponent(config.clientId)}`),
 		{ timeoutDuration: 10000 }

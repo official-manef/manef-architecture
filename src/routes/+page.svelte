@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	const session = $derived(page.data.auth?.session);
 </script>
@@ -17,7 +18,7 @@
 		<h1>{appConfig.landing.title}</h1>
 		<p class="lead">{appConfig.landing.description}</p>
 		<div class="actions">
-			<Button size="lg" onclick={() => goto('/app')}>Open diagram</Button>
+			<Button size="lg" onclick={() => goto(resolve('/app'))}>Open diagram</Button>
 			{#if session}
 				<span class="signed-in">Signed in as {session.email ?? session.subject}</span>
 				<form method="POST" action="/auth/logout">

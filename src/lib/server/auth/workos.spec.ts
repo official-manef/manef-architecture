@@ -122,7 +122,7 @@ test('code exchange verifies the signed WorkOS identity and discards Google prov
 	expect(JSON.stringify(result)).not.toContain('unused-google-provider-token');
 });
 
-test.each(['state', 'duplicate-state', 'duplicate-code', 'provider', 'client', 'origin']) (
+test.each(['state', 'duplicate-state', 'duplicate-code', 'provider', 'client', 'origin'])(
 	'rejects an invalid %s before exchanging a code',
 	async (failure) => {
 		const mock = await workosMock();

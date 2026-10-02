@@ -47,6 +47,7 @@ context. This authentication change does not claim the pending private graph edi
 agent-write API, cross-subdomain session flow, or full demo redesign is complete.
 
 Sources:
+
 - https://workos.com/docs/reference/authkit/authentication/code
 - https://workos.com/docs/authkit/sessions
 - https://docs.convex.dev/auth/authkit/add-to-app
