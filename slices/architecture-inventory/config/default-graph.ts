@@ -29,13 +29,13 @@ export const defaultGraph: ArchitectureGraph = {
 		]),
 		node(
 			'architecture',
-			'architecture.manef.dev',
-			'Reusable architecture inventory and graph feature',
+			'diagram.manef.dev',
+			'Interactive architecture + agent context graph',
 			2,
 			'active',
-			['manef', 'architecture', 'product']
+			['manef', 'architecture', 'product', 'project:manef-diagram', 'platform:vercel', 'kind:context-graph']
 		),
-		node('mso', 'mso.manef.dev', 'Manef Shell OS', 2, 'active', ['manef', 'product', 'ai']),
+		node('mso', 'mso.manef.dev', 'Manef Shell OS', 2, 'active', ['manef', 'product', 'ai', 'project:mso', 'kind:product']),
 		node('models', 'models.manef.dev', 'Model catalog and routing', 2, 'proposed', [
 			'manef',
 			'product',
@@ -136,21 +136,21 @@ export const defaultInventory: InventoryItem[] = [
 		id: 'open-silong',
 		label: 'Open Silong',
 		subtitle: 'Knowledge graph patterns reused as a framework-neutral reference',
-		tags: ['reference', 'graph', 'knowledge'],
+		tags: ['reference', 'graph', 'knowledge', 'kind:reference', 'source:github'],
 		status: 'active'
 	},
 	{
 		id: 'convex-cloud',
 		label: 'Convex Cloud',
 		subtitle: 'Optional managed realtime persistence adapter',
-		tags: ['backend', 'convex', 'cloud'],
+		tags: ['backend', 'convex', 'cloud', 'platform:convex', 'kind:backend'],
 		status: 'active'
 	},
 	{
 		id: 'dokploy',
 		label: 'Dokploy',
 		subtitle: 'Production Node/container deployment target',
-		tags: ['deploy', 'infra'],
+		tags: ['deploy', 'infra', 'platform:dokploy', 'kind:deployment'],
 		status: 'active'
 	}
 ];

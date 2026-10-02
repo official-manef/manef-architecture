@@ -145,6 +145,9 @@ test('official stateless MCP server advertises read-only graph tools', async () 
 	const names = tools.map((tool: { name: string }) => tool.name);
 	expect(names).toContain('graph_status');
 	expect(names).toContain('graph_trace');
+	expect(names).toContain('graph_query');
+	expect(names).toContain('graph_build_view');
+	expect(names).toContain('graph_create_portable_view');
 	for (const tool of tools) {
 		expect(tool.annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false });
 	}

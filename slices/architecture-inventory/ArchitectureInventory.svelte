@@ -11,7 +11,11 @@
 		layoutGraph,
 		parseGraphJson,
 		searchInventory,
-		traceGraph
+		traceGraph,
+		buildDiagramViewUrl,
+		parseDiagramView,
+		tagGroup,
+		tagsMatchFacets
 	} from './index';
 	import type {
 		ArchitectureEdge,
@@ -26,6 +30,17 @@
 	let graph = $state<ArchitectureGraph>(cloneGraph(defaultGraph));
 	let hydrated = $state(false);
 	onMount(() => {
+		const view = parseDiagramView(window.location.search);
+		if (view.graph) graph = view.graph;
+		search = view.query;
+		activeTags = view.tags;
+		diagramMode = view.mode;
+		traceMode = view.trace;
+		focusMode = view.focus;
+		if (view.seeds[0] && graph.nodes.some((node) => node.id === view.seeds[0])) {
+			selectedNodeId = view.seeds[0];
+		}
+		jsonText = JSON.stringify(graph, null, 2);
 		hydrated = true;
 	});
 	let diagramMode = $state<DiagramMode>('flow');
@@ -68,6 +83,15 @@
 	const selectedNode = $derived(graph.nodes.find((node) => node.id === selectedNodeId));
 	const selectedEdge = $derived(graph.edges.find((edge) => edge.id === selectedEdgeId));
 	const allTags = $derived([...new Set(graph.nodes.flatMap((node) => node.tags))].sort());
+	const tagGroups = $derived(
+		Object.entries(
+			allTags.reduce<Record<string, string[]>>((groups, tag) => {
+				const group = tagGroup(tag);
+				groups[group] = [...(groups[group] ?? []), tag];
+				return groups;
+			}, {})
+		).sort(([a], [b]) => a.localeCompare(b))
+	);
 	const inventoryItems = $derived(searchInventory(defaultInventory, inventorySearch));
 	const worldStyle = $derived(`transform: translate(${pan.x}px, ${pan.y}px) scale(${zoom});`);
 
@@ -76,7 +100,7 @@
 		const searchMatch =
 			!needle ||
 			[node.label, node.subtitle ?? '', ...node.tags].join(' ').toLowerCase().includes(needle);
-		const tagMatch = activeTags.length === 0 || activeTags.some((tag) => node.tags.includes(tag));
+		const tagMatch = tagsMatchFacets(node.tags, activeTags);
 		const focusMatch = !focusMode || !selectedNodeId || highlightedNodeIds.has(node.id);
 		return searchMatch && tagMatch && focusMatch;
 	}
@@ -210,6 +234,24 @@
 			: [...activeTags, tag];
 	}
 
+	async function shareView() {
+		try {
+			const url = buildDiagramViewUrl({
+				graph,
+				query: search,
+				tags: activeTags,
+				seeds: selectedNodeId ? [selectedNodeId] : [],
+				mode: diagramMode,
+				trace: traceMode,
+				focus: focusMode
+			});
+			await navigator.clipboard.writeText(url);
+			jsonMessage = "Portable graph link copied.";
+		} catch (error) {
+			jsonMessage = error instanceof Error ? error.message : "Could not create a portable link.";
+		}
+	}
+
 	function edgePath(edge: ArchitectureEdge) {
 		const source = basePositions[edge.source] ?? { x: 0, y: 0 };
 		const target = basePositions[edge.target] ?? { x: 0, y: 0 };
@@ -318,6 +360,7 @@
 		<div class="top-actions">
 			<Button data-interactive variant="outline" size="sm" onclick={addNode}>+ Node</Button>
 			<Button data-interactive variant="outline" size="sm" onclick={exportJson}>Export</Button>
+			<Button data-interactive variant="outline" size="sm" onclick={shareView}>Share view</Button>
 		</div>
 	</header>
 
@@ -326,13 +369,22 @@
 			<section>
 				<h2>Explore canvas</h2>
 				<Input aria-label="Search graph" placeholder="Search graph…" bind:value={search} />
-				<div class="tags" aria-label="Tag filters">
-					{#each allTags as tag (tag)}
-						<Button
-							size="sm"
-							variant={activeTags.includes(tag) ? 'default' : 'outline'}
-							onclick={() => toggleTag(tag)}>{tag}</Button
-						>
+				<div class="tag-groups" aria-label="Tag group filters">
+					{#each tagGroups as [group, tags] (group)}
+						<div class="tag-group">
+							<strong>{group}</strong>
+							<div class="tags">
+								{#each tags as tag (tag)}
+									<Button
+										size="sm"
+										variant={activeTags.includes(tag) ? 'default' : 'outline'}
+										onclick={() => toggleTag(tag)}
+									>
+										{tag.includes(':') ? tag.slice(tag.indexOf(':') + 1) : tag}
+									</Button>
+								{/each}
+							</div>
+						</div>
 					{/each}
 				</div>
 			</section>
@@ -779,6 +831,20 @@
 		display: grid;
 		gap: 0.3rem;
 		font-size: 0.75rem;
+		color: var(--muted-foreground);
+	}
+	.tag-groups {
+		display: grid;
+		gap: 0.7rem;
+	}
+	.tag-group {
+		display: grid;
+		gap: 0.35rem;
+	}
+	.tag-group > strong {
+		font-size: 0.68rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 		color: var(--muted-foreground);
 	}
 	.tags {

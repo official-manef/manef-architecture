@@ -2,7 +2,7 @@
 
 Reusable MANEF architecture inventory and graph feature.
 
-- Canonical app: `https://architecture.manef.dev`
+- Canonical app: `https://diagram.manef.dev`
 - Canonical UI: Svelte 5 + SvelteKit
 - Reusable core: framework-neutral TypeScript under `slices/architecture-inventory/`
 - Backend: optional Convex Cloud; clean clones work from the bundled public seed
@@ -32,3 +32,7 @@ bun run build
 ```
 
 See `docs/PRD.md`, `docs/framework-adapters.md`, and `CONTRACT.md`.
+
+## Agent context graph
+
+The diagram supports portable navigable views and namespaced facets for project, platform, agent, kind, and source context. See docs/context-graph.md.
