@@ -1,0 +1,52 @@
+name: Deploy Convex authentication
+
+on:
+  workflow_dispatch:
+    inputs:
+      workos_client_id:
+        description: Production WorkOS Client ID matching diagram.manef.dev
+        required: true
+        default: client_01M3X9NDW4TE0P8DN6XS246PVM
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: convex-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run verify
+      - name: Configure and deploy the selected production backend
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+          WORKOS_CLIENT_ID: ${{ inputs.workos_client_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${CONVEX_DEPLOY_KEY:-}" != "prod:dutiful-zebra-689|"* ]]; then
+            echo 'Set CONVEX_DEPLOY_KEY to a production key for dutiful-zebra-689.' >&2
+            exit 1
+          fi
+          if [[ ! "$WORKOS_CLIENT_ID" =~ ^client_[[:alnum:]]+$ ]]; then
+            echo 'Provide the production WorkOS Client ID used by the frontend.' >&2
+            exit 1
+          fi
+          bunx --no-install convex env set WORKOS_CLIENT_ID "$WORKOS_CLIENT_ID"
+          bunx --no-install convex deploy --yes

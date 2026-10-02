@@ -20,6 +20,24 @@ Diagram is an application consumer, not another Google OAuth project.
 6. Verify the login redirect, real Google consent, callback, session refresh, and an
    owner-isolated private data operation before declaring production authentication done.
 
+### Repository deployment workflow
+
+The manual `Deploy Convex authentication` workflow performs step 5 for the linked
+production backend, `dutiful-zebra-689`. It runs only from `main`, verifies the source
+before remote changes, and rejects keys for other deployments.
+
+In the repository's private Actions secrets settings, configure `CONVEX_DEPLOY_KEY`
+with a production deployment key scoped to `dutiful-zebra-689`. It needs the
+`deployment:deploy` and `deployment:env:write` permissions. Do not put this key in
+Actions variables, workflow inputs, source, or chat.
+
+Run the workflow from GitHub Actions using the public WorkOS Client ID that matches
+the production frontend. Its initial default comes from the verified Vercel
+Production setting; update it if the frontend's identity environment changes.
+The workflow sets the backend variable and deploys the checked-in Convex schema,
+functions, and authentication configuration. It does not perform user login or prove
+real consent, callback, refresh, or private-data acceptance; step 6 remains required.
+
 ## Security contract
 
 The browser is sent to WorkOS AuthKit with state and S256 PKCE. The consumed encrypted
